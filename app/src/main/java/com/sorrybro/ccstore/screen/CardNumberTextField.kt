@@ -13,11 +13,13 @@ import com.sorrybro.ccstore.R
 
 @Composable
 fun CardNumberTextField(
+    enabled: Boolean,
     cardNumberState: TextFieldValue,
     onCardNumberChange: (TextFieldValue) -> Unit,
     modifier: Modifier
 ) {
     OutlinedTextField(
+        enabled = enabled,
         modifier = modifier,
         value = cardNumberState,
         onValueChange = { newValue ->
