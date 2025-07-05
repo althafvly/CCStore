@@ -1,47 +1,54 @@
 package com.sorrybro.ccstore
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.ProcessLifecycleOwner
+import com.sorrybro.ccstore.auth.AuthManager
+import com.sorrybro.ccstore.screen.MainScreen
 import com.sorrybro.ccstore.ui.theme.CCStoreTheme
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        // Observe foreground state
+        ProcessLifecycleOwner.get().lifecycle.addObserver(appLifecycleObserver)
+
+        // First-time authentication
+        AuthManager.authenticate(
+            context = this,
+            onSuccess = { onSuccess() }
+        )
+    }
+
+    fun onSuccess() {
         setContent {
             CCStoreTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                MainScreen()
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    private val appLifecycleObserver = LifecycleEventObserver { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_PAUSE -> {
+                // Save timestamp when app goes to background
+                AuthManager.updateLastPauseTime()
+            }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CCStoreTheme {
-        Greeting("Android")
+            Lifecycle.Event.ON_RESUME -> {
+                if (AuthManager.needsReAuth()) {
+                    AuthManager.authenticate(
+                        context = this,
+                        onSuccess = { onSuccess() }
+                    )
+                }
+            }
+
+            else -> Unit
+        }
     }
 }

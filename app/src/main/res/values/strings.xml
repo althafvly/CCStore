@@ -1,3 +1,19 @@
 <resources>
+    <string name="add_card">Add Card</string>
     <string name="app_name">CCStore</string>
+    <string name="authenticate_title">Authenticate to access your cards</string>
+    <string name="card_number">Card Number</string>
+    <string name="card_saved">Card saved.</string>
+    <string name="cardholder_name">Cardholder Name</string>
+    <string name="cvv">CVV</string>
+    <string name="delete">Delete</string>
+    <string name="expiry_mm_yy">Expiry MM/YY</string>
+    <string name="expires">"Expires: "</string>
+    <string name="save_card">Save Card</string>
+    <string name="saved_cards">Saved Cards</string>
+    <string name="toast_cvv_valid">CVV must be 3 or 4 digits.</string>
+    <string name="toast_expiry_valid">Expiry must be in MM/YY format.</string>
+    <string name="toast_name_valid">Name must be alphanumeric.</string>
+    <string name="toast_number_valid">Card number must be 16 digits.</string>
+    <string name="your_cards">Your Cards</string>
 </resources>
