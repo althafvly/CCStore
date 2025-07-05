@@ -1,9 +1,10 @@
-package com.sorrybro.ccstore.ui
+package com.sorrybro.ccstore.screen
 
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
@@ -13,9 +14,11 @@ import com.sorrybro.ccstore.R
 @Composable
 fun CardNumberTextField(
     cardNumberState: TextFieldValue,
-    onCardNumberChange: (TextFieldValue) -> Unit
+    onCardNumberChange: (TextFieldValue) -> Unit,
+    modifier: Modifier
 ) {
     OutlinedTextField(
+        modifier = modifier,
         value = cardNumberState,
         onValueChange = { newValue ->
             val digits = newValue.text.filter { it.isDigit() }.take(16)

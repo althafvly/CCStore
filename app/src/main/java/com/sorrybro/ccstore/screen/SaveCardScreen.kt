@@ -9,11 +9,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -33,7 +38,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.sorrybro.ccstore.R
 import com.sorrybro.ccstore.data.CardEntity
-import com.sorrybro.ccstore.ui.CardNumberTextField
 import com.sorrybro.ccstore.view.CardViewModel
 import kotlinx.coroutines.launch
 
@@ -52,114 +56,150 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.padding(padding)
+                modifier = Modifier.padding(padding),
+                snackbar = { data ->
+                    Snackbar(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer, // Your custom background color
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer, // Your custom text color
+                        shape = RoundedCornerShape(12.dp), // Optional: Rounded corners
+                        snackbarData = data
+                    )
+                }
             )
         },
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets // prevent double-padding
-    ) { padding ->
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets
+    ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(0.9f),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.cardholder_name)) }
-                )
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.add_card),
+                        style = MaterialTheme.typography.titleLarge
+                    )
 
-                CardNumberTextField(
-                    cardNumberState = cardNumberField,
-                    onCardNumberChange = { cardNumberField = it }
-                )
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text(stringResource(R.string.cardholder_name)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
 
-                OutlinedTextField(
-                    value = expiryField,
-                    onValueChange = { newValue ->
-                        val digits = newValue.text.filter { it.isDigit() }.take(4)
-                        val formatted = when {
-                            digits.length <= 2 -> digits
-                            else -> digits.substring(0, 2) + "/" + digits.substring(2)
-                        }
+                    CardNumberTextField(
+                        cardNumberState = cardNumberField,
+                        onCardNumberChange = { cardNumberField = it },
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                        // Calculate new cursor position
-                        val unformattedCursor =
-                            newValue.text.take(newValue.selection.start).count { it.isDigit() }
-                        val cursorOffset = if (unformattedCursor > 2) 1 else 0
-                        val newCursor =
-                            (unformattedCursor + cursorOffset).coerceAtMost(formatted.length)
-
-                        expiryField = TextFieldValue(
-                            text = formatted,
-                            selection = TextRange(newCursor)
-                        )
-                    },
-                    label = { Text(stringResource(R.string.expiry_mm_yy)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-
-                OutlinedTextField(
-                    value = cvv,
-                    onValueChange = { input ->
-                        if (input.length <= 4 && input.all { it.isDigit() }) cvv = input
-                    },
-                    label = { Text(stringResource(R.string.cvv)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword)
-                )
-
-                Spacer(Modifier.height(8.dp))
-
-                Button(onClick = {
-                    val number = cardNumberField.text.replace(" ", "")
-                    val isNameValid = name.matches(Regex("^[a-zA-Z0-9 ]+$"))
-                    val isNumberValid = number.length == 16
-                    val expiry = expiryField.text
-                    val isExpiryValid = expiry.matches(Regex("^(0[1-9]|1[0-2])/\\d{2}$"))
-                    val isCvvValid = cvv.length in 3..4
-
-                    when {
-                        !isNameValid -> coroutineScope.launch {
-                            snackbarHostState.showSnackbar(context.getString(R.string.toast_name_valid))
-                        }
-
-                        !isNumberValid -> coroutineScope.launch {
-                            snackbarHostState.showSnackbar(context.getString(R.string.toast_number_valid))
-                        }
-
-                        !isExpiryValid -> coroutineScope.launch {
-                            snackbarHostState.showSnackbar(context.getString(R.string.toast_expiry_valid))
-                        }
-
-                        !isCvvValid -> coroutineScope.launch {
-                            snackbarHostState.showSnackbar(context.getString(R.string.toast_cvv_valid))
-                        }
-
-                        else -> {
-                            viewModel.save(
-                                CardEntity(
-                                    name = name,
-                                    number = number,
-                                    expiry = expiry,
-                                    cvv = cvv
-                                )
-                            )
-                            name = ""
-                            expiryField = TextFieldValue("")
-                            cvv = ""
-                            cardNumberField = TextFieldValue("")
-                            coroutineScope.launch {
-                                snackbarHostState.showSnackbar(context.getString(R.string.card_saved))
+                    OutlinedTextField(
+                        value = expiryField,
+                        onValueChange = { newValue ->
+                            val digits = newValue.text.filter { it.isDigit() }.take(4)
+                            val formatted = when {
+                                digits.length <= 2 -> digits
+                                else -> digits.substring(0, 2) + "/" + digits.substring(2)
                             }
-                        }
+
+                            val unformattedCursor =
+                                newValue.text.take(newValue.selection.start).count { it.isDigit() }
+                            val cursorOffset = if (unformattedCursor > 2) 1 else 0
+                            val newCursor =
+                                (unformattedCursor + cursorOffset).coerceAtMost(formatted.length)
+
+                            expiryField = TextFieldValue(
+                                text = formatted,
+                                selection = TextRange(newCursor)
+                            )
+                        },
+                        label = { Text(stringResource(R.string.expiry_mm_yy)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = cvv,
+                        onValueChange = { input ->
+                            if (input.length <= 4 && input.all { it.isDigit() }) cvv = input
+                        },
+                        label = { Text(stringResource(R.string.cvv)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = {
+                            val number = cardNumberField.text.replace(" ", "")
+                            val isNameValid = name.matches(Regex("^[a-zA-Z0-9 ]+$"))
+                            val isNumberValid = number.length == 16
+                            val expiry = expiryField.text
+                            val isExpiryValid = expiry.matches(Regex("^(0[1-9]|1[0-2])/\\d{2}$"))
+                            val isCvvValid = cvv.length in 3..4
+
+                            when {
+                                !isNameValid -> coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(context.getString(R.string.toast_name_valid))
+                                }
+
+                                !isNumberValid -> coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(context.getString(R.string.toast_number_valid))
+                                }
+
+                                !isExpiryValid -> coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(context.getString(R.string.toast_expiry_valid))
+                                }
+
+                                !isCvvValid -> coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(context.getString(R.string.toast_cvv_valid))
+                                }
+
+                                else -> {
+                                    viewModel.save(
+                                        CardEntity(
+                                            name = name,
+                                            number = number,
+                                            expiry = expiry,
+                                            cvv = cvv
+                                        )
+                                    )
+                                    name = ""
+                                    expiryField = TextFieldValue("")
+                                    cvv = ""
+                                    cardNumberField = TextFieldValue("")
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(context.getString(R.string.card_saved))
+                                    }
+                                }
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(text = stringResource(R.string.save_card))
                     }
-                }) {
-                    Text(context.getString(R.string.save_card))
                 }
             }
         }
