@@ -49,7 +49,10 @@ fun MainScreen(viewModel: CardViewModel = viewModel()) {
             )
         },
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            ) {
                 NavigationBarItem(
                     selected = selected == NavRoutes.SAVE,
                     onClick = {
