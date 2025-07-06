@@ -47,6 +47,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.sorrybro.ccstore.R
+import com.sorrybro.ccstore.data.BankName
 import com.sorrybro.ccstore.data.CardEntity
 import com.sorrybro.ccstore.data.CardNetwork
 import com.sorrybro.ccstore.view.CardViewModel
@@ -56,12 +57,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
     var name by rememberSaveable { mutableStateOf("") }
+    var bankName by rememberSaveable { mutableStateOf("") }
     var cvv by rememberSaveable { mutableStateOf("") }
     var cardNumber by rememberSaveable { mutableStateOf("") }
     var cardNetwork by rememberSaveable { mutableStateOf("") }
     var expiry by rememberSaveable { mutableStateOf("") }
     val supportedNetworks = CardNetwork.displayNames()
+    val supportedBanks = BankName.displayNames()
     var networkExpanded by rememberSaveable { mutableStateOf(false) }
+    var bankNameExpanded by rememberSaveable { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -121,6 +125,40 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
                     )
 
                     ExposedDropdownMenuBox(
+                        expanded = bankNameExpanded,
+                        onExpandedChange = { bankNameExpanded = !bankNameExpanded }
+                    ) {
+                        TextField(
+                            value = bankName,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text(stringResource(R.string.bank_name)) },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = bankNameExpanded)
+                            },
+                            modifier = Modifier
+                                .menuAnchor(MenuAnchorType.PrimaryEditable, enabled = true)
+                                .fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = bankNameExpanded,
+                            onDismissRequest = { bankNameExpanded = false }
+                        ) {
+                            supportedBanks.forEach { name ->
+                                DropdownMenuItem(
+                                    text = { Text(name.ifEmpty { stringResource(R.string.none) }) },
+                                    onClick = {
+                                        bankName = name
+                                        bankNameExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    ExposedDropdownMenuBox(
                         expanded = networkExpanded,
                         onExpandedChange = { networkExpanded = !networkExpanded }
                     ) {
@@ -163,7 +201,8 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
                         value = internalCardNumber,
                         onValueChange = { newValue ->
                             val digits = newValue.text.filter { it.isDigit() }
-                            val maxLength = if (cardNetwork == CardNetwork.AMERICAN_EXPRESS.displayName) 15 else 16
+                            val maxLength =
+                                if (cardNetwork == CardNetwork.AMERICAN_EXPRESS.displayName) 15 else 16
                             val limitedDigits = digits.take(maxLength)
                             val formatted = limitedDigits.chunked(4).joinToString(" ")
 
@@ -186,13 +225,14 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
                             }
 
                             // Prevent cursor from jumping beyond input
-                            val finalCursor = if (formatted.length == internalCardNumber.text.length &&
-                                formatted == internalCardNumber.text
-                            ) {
-                                internalCardNumber.selection.start
-                            } else {
-                                newCursor.coerceAtMost(formatted.length)
-                            }
+                            val finalCursor =
+                                if (formatted.length == internalCardNumber.text.length &&
+                                    formatted == internalCardNumber.text
+                                ) {
+                                    internalCardNumber.selection.start
+                                } else {
+                                    newCursor.coerceAtMost(formatted.length)
+                                }
 
                             internalCardNumber = TextFieldValue(
                                 text = formatted,
@@ -207,15 +247,51 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
                         shape = RoundedCornerShape(12.dp)
                     )
 
+                    var internalExpiry by remember {
+                        mutableStateOf(TextFieldValue(expiry))
+                    }
+
                     OutlinedTextField(
                         enabled = cardNetwork.isNotEmpty(),
-                        value = expiry,
+                        value = internalExpiry,
                         onValueChange = { newValue ->
-                            val digits = newValue.filter { it.isDigit() }.take(4)
+                            val digits = newValue.text.filter { it.isDigit() }.take(4)
+
                             val formatted = when {
                                 digits.length <= 2 -> digits
                                 else -> digits.substring(0, 2) + "/" + digits.substring(2)
                             }
+
+                            // Count digits before cursor
+                            val digitsBeforeCursor = newValue.text
+                                .take(newValue.selection.start)
+                                .count { it.isDigit() }
+
+                            // Calculate new cursor position
+                            var digitCount = 0
+                            var newCursor = 0
+                            for ((i, c) in formatted.withIndex()) {
+                                if (c.isDigit()) digitCount++
+                                if (digitCount == digitsBeforeCursor + 1) {
+                                    newCursor = i + 1
+                                    break
+                                } else if (digitCount == digitsBeforeCursor) {
+                                    newCursor = i + 1
+                                }
+                            }
+
+                            // Avoid cursor jump if content unchanged
+                            val finalCursor = if (formatted == internalExpiry.text) {
+                                internalExpiry.selection.start
+                            } else {
+                                newCursor.coerceAtMost(formatted.length)
+                            }
+
+                            internalExpiry = TextFieldValue(
+                                text = formatted,
+                                selection = TextRange(finalCursor)
+                            )
+
                             expiry = formatted
                         },
                         label = { Text(stringResource(R.string.expiry_mm_yy)) },
@@ -228,7 +304,8 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
                         enabled = cardNetwork.isNotEmpty(),
                         value = cvv,
                         onValueChange = { input ->
-                            val length = if (cardNetwork == CardNetwork.AMERICAN_EXPRESS.displayName) 4 else 3
+                            val length =
+                                if (cardNetwork == CardNetwork.AMERICAN_EXPRESS.displayName) 4 else 3
                             if (input.length <= length && input.all { it.isDigit() }) cvv = input
                         },
                         label = { Text(stringResource(R.string.cvv)) },
@@ -249,24 +326,30 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
                                 CardNetwork.MASTERCARD.displayName,
                                 CardNetwork.RUPAY.displayName,
                                 CardNetwork.DISCOVER.displayName -> numberRaw.length == 16
+
                                 else -> numberRaw.length in 13..19
                             }
                             val isExpiryValid = expiry.matches(Regex("^(0[1-9]|1[0-2])/\\d{2}$"))
-                            val isCvvValid = if (cardNetwork == CardNetwork.AMERICAN_EXPRESS.displayName) cvv.length == 4 else cvv.length == 3
+                            val isCvvValid =
+                                if (cardNetwork == CardNetwork.AMERICAN_EXPRESS.displayName) cvv.length == 4 else cvv.length == 3
 
                             when {
                                 !isNameValid -> coroutineScope.launch {
                                     snackbarHostState.showSnackbar(context.getString(R.string.toast_name_valid))
                                 }
+
                                 !isNumberValid -> coroutineScope.launch {
                                     snackbarHostState.showSnackbar(context.getString(R.string.toast_number_valid))
                                 }
+
                                 !isExpiryValid -> coroutineScope.launch {
                                     snackbarHostState.showSnackbar(context.getString(R.string.toast_expiry_valid))
                                 }
+
                                 !isCvvValid -> coroutineScope.launch {
                                     snackbarHostState.showSnackbar(context.getString(R.string.toast_cvv_valid))
                                 }
+
                                 else -> {
                                     viewModel.save(
                                         CardEntity(
@@ -274,7 +357,8 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
                                             number = numberRaw,
                                             expiry = expiry,
                                             cvv = cvv,
-                                            network = cardNetwork
+                                            network = cardNetwork,
+                                            bankName = bankName
                                         )
                                     )
                                     name = ""

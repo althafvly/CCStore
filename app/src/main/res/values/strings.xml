@@ -24,5 +24,7 @@
     <string name="copy_number">Copy number</string>
     <string name="expiry_copied">Expiry copied</string>
     <string name="copy_expiry">Copy expiry</string>
-    <string name="authenticating">Authenticating...</string>
+    <string name="authenticating">Authenticating…</string>
+    <string name="bank_name">Bank name</string>
+    <string name="none">None</string>
 </resources>

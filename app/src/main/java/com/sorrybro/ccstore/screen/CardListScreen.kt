@@ -49,6 +49,7 @@ import com.sorrybro.ccstore.view.CardViewModel
 @Composable
 fun CardListScreen(viewModel: CardViewModel, padding: PaddingValues) {
     val cards by viewModel.cards.collectAsState()
+    val sortedCards = cards.sortedBy { it.bankName.lowercase() }
     val clipboardManager = LocalClipboard.current
     var cardToDelete by remember { mutableStateOf<CardEntity?>(null) }
 
@@ -73,14 +74,16 @@ fun CardListScreen(viewModel: CardViewModel, padding: PaddingValues) {
         )
     }
 
-    Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+    Box(modifier = Modifier
+        .padding(padding)
+        .fillMaxSize()) {
         LazyColumn(
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(cards) { card ->
+            items(sortedCards) { card ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -130,8 +133,24 @@ fun CardListScreen(viewModel: CardViewModel, padding: PaddingValues) {
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
+                                        text = card.bankName,
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            letterSpacing = 2.sp
+                                        ),
+                                        color = Color.White
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
                                         text = card.number,
-                                        style = MaterialTheme.typography.titleMedium.copy(letterSpacing = 2.sp),
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            letterSpacing = 2.sp
+                                        ),
                                         color = Color.White
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))

@@ -2,6 +2,7 @@
 agp = "8.11.0"
 androidDatabaseSqlcipher = "4.5.4"
 biometric = "1.4.0-alpha04"
+encryptedprefsKtx = "1.0.3"
 kotlin = "2.2.0"
 coreKtx = "1.16.0"
 ksp="2.2.0-2.0.2"
@@ -35,6 +36,7 @@ androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+encryptedprefs-ktx = { module = "dev.spght:encryptedprefs-ktx", version.ref = "encryptedprefsKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

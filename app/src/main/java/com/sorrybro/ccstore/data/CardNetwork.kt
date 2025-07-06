@@ -7,7 +7,6 @@ enum class CardNetwork(val displayName: String) {
     RUPAY("RuPay"),
     DINERS_CLUB("Diners Club"),
     DISCOVER("Discover"),
-    MAESTRO("Maestro"),
     JCB("JCB");
 
     companion object {

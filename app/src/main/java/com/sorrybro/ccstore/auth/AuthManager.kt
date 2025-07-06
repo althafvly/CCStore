@@ -1,7 +1,6 @@
 package com.sorrybro.ccstore.auth
 
 import android.app.Activity
-import android.content.Context
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
