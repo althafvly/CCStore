@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,13 +55,13 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
-    var name by remember { mutableStateOf("") }
-    var cvv by remember { mutableStateOf("") }
-    var cardNumberField by remember { mutableStateOf(TextFieldValue("")) }
-    var cardNetworkField by remember { mutableStateOf(TextFieldValue("")) }
-    var expiryField by remember { mutableStateOf(TextFieldValue("")) }
+    var name by rememberSaveable { mutableStateOf("") }
+    var cvv by rememberSaveable { mutableStateOf("") }
+    var cardNumber by rememberSaveable { mutableStateOf("") }
+    var cardNetwork by rememberSaveable { mutableStateOf("") }
+    var expiry by rememberSaveable { mutableStateOf("") }
     val supportedNetworks = CardNetwork.displayNames()
-    var networkExpanded by remember { mutableStateOf(false) }
+    var networkExpanded by rememberSaveable { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -112,9 +113,7 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
                     OutlinedTextField(
                         value = name,
                         onValueChange = { input ->
-                            // Filter input: only letters and spaces allowed
-                            val filtered = input.filter { it.isLetter() || it.isWhitespace() }
-                            name = filtered
+                            name = input.filter { it.isLetter() || it.isWhitespace() }
                         },
                         label = { Text(stringResource(R.string.cardholder_name)) },
                         modifier = Modifier.fillMaxWidth(),
@@ -126,7 +125,7 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
                         onExpandedChange = { networkExpanded = !networkExpanded }
                     ) {
                         TextField(
-                            value = cardNetworkField.text,
+                            value = cardNetwork,
                             onValueChange = {},
                             readOnly = true,
                             label = { Text(stringResource(R.string.card_network)) },
@@ -147,7 +146,7 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
                                 DropdownMenuItem(
                                     text = { Text(network) },
                                     onClick = {
-                                        cardNetworkField = TextFieldValue(network)
+                                        cardNetwork = network
                                         networkExpanded = false
                                     }
                                 )
@@ -155,58 +154,69 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
                         }
                     }
 
-                    CardNumberTextField(
-                        enabled = !cardNetworkField.text.isEmpty(),
-                        cardNumberState = cardNumberField,
-                        onCardNumberChange = {
-                            val number = it.text.replace(" ", "")
-                            val length =
-                                if (cardNetworkField.text == CardNetwork.AMERICAN_EXPRESS.displayName)
-                                    15 else 16
-                            if (number.length <= length && number.all { it.isDigit() }) cardNumberField =
-                                it
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    var internalCardNumber by remember {
+                        mutableStateOf(TextFieldValue(cardNumber))
+                    }
 
                     OutlinedTextField(
-                        enabled = !cardNetworkField.text.isEmpty(),
-                        value = expiryField,
+                        enabled = cardNetwork.isNotEmpty(),
+                        value = internalCardNumber,
                         onValueChange = { newValue ->
-                            val digits = newValue.text.filter { it.isDigit() }.take(4)
+                            val digits = newValue.text.filter { it.isDigit() }
+                            val maxLength = if (cardNetwork == CardNetwork.AMERICAN_EXPRESS.displayName) 15 else 16
+                            val limitedDigits = digits.take(maxLength)
+                            val formatted = limitedDigits.chunked(4).joinToString(" ")
 
-                            val validated = buildString {
-                                for ((index, char) in digits.withIndex()) {
-                                    when (index) {
-                                        0 -> if (char == '0' || char == '1') append(char)
-                                        1 -> {
-                                            val first = this.getOrNull(0)
-                                            if (first == '0' && char in '1'..'9') append(char)
-                                            else if (first == '1' && char in '0'..'2') append(char)
-                                        }
-
-                                        2, 3 -> append(char)
-                                    }
-                                }
-                            }
-
-                            val formatted = when {
-                                validated.length <= 2 -> validated
-                                else -> validated.substring(0, 2) + "/" + validated.substring(2)
-                            }
-
-                            val unformattedCursor = newValue.text
+                            // Count digits before old cursor
+                            val digitsBeforeCursor = newValue.text
                                 .take(newValue.selection.start)
                                 .count { it.isDigit() }
 
-                            val cursorOffset = if (unformattedCursor > 2) 1 else 0
-                            val newCursor = (unformattedCursor + cursorOffset)
-                                .coerceAtMost(formatted.length)
+                            // Compute new cursor position
+                            var digitCount = 0
+                            var newCursor = 0
+                            for ((i, c) in formatted.withIndex()) {
+                                if (c.isDigit()) digitCount++
+                                if (digitCount == digitsBeforeCursor + 1) {
+                                    newCursor = i + 1
+                                    break
+                                } else if (digitCount == digitsBeforeCursor) {
+                                    newCursor = i + 1
+                                }
+                            }
 
-                            expiryField = TextFieldValue(
+                            // Prevent cursor from jumping beyond input
+                            val finalCursor = if (formatted.length == internalCardNumber.text.length &&
+                                formatted == internalCardNumber.text
+                            ) {
+                                internalCardNumber.selection.start
+                            } else {
+                                newCursor.coerceAtMost(formatted.length)
+                            }
+
+                            internalCardNumber = TextFieldValue(
                                 text = formatted,
-                                selection = TextRange(newCursor)
+                                selection = TextRange(finalCursor)
                             )
+
+                            cardNumber = formatted
+                        },
+                        label = { Text(stringResource(R.string.card_number)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    OutlinedTextField(
+                        enabled = cardNetwork.isNotEmpty(),
+                        value = expiry,
+                        onValueChange = { newValue ->
+                            val digits = newValue.filter { it.isDigit() }.take(4)
+                            val formatted = when {
+                                digits.length <= 2 -> digits
+                                else -> digits.substring(0, 2) + "/" + digits.substring(2)
+                            }
+                            expiry = formatted
                         },
                         label = { Text(stringResource(R.string.expiry_mm_yy)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -215,11 +225,10 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
                     )
 
                     OutlinedTextField(
-                        enabled = !cardNetworkField.text.isEmpty(),
+                        enabled = cardNetwork.isNotEmpty(),
                         value = cvv,
                         onValueChange = { input ->
-                            val length =
-                                if (cardNetworkField.text == CardNetwork.AMERICAN_EXPRESS.displayName) 4 else 3
+                            val length = if (cardNetwork == CardNetwork.AMERICAN_EXPRESS.displayName) 4 else 3
                             if (input.length <= length && input.all { it.isDigit() }) cvv = input
                         },
                         label = { Text(stringResource(R.string.cvv)) },
@@ -232,57 +241,47 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
 
                     Button(
                         onClick = {
-                            val number = cardNumberField.text.replace(" ", "")
+                            val numberRaw = cardNumber.replace(" ", "")
                             val isNameValid = name.matches(Regex("^[a-zA-Z ]+$"))
-                            val isNumberValid = when (cardNetworkField.text) {
-                                CardNetwork.AMERICAN_EXPRESS.displayName -> number.length == 15
+                            val isNumberValid = when (cardNetwork) {
+                                CardNetwork.AMERICAN_EXPRESS.displayName -> numberRaw.length == 15
                                 CardNetwork.VISA.displayName,
                                 CardNetwork.MASTERCARD.displayName,
                                 CardNetwork.RUPAY.displayName,
-                                CardNetwork.DISCOVER.displayName -> number.length == 16
-
-                                else -> number.length in 13..19
+                                CardNetwork.DISCOVER.displayName -> numberRaw.length == 16
+                                else -> numberRaw.length in 13..19
                             }
-                            val expiry = expiryField.text
                             val isExpiryValid = expiry.matches(Regex("^(0[1-9]|1[0-2])/\\d{2}$"))
-                            val isCvvValid = when (cardNetworkField.text) {
-                                CardNetwork.AMERICAN_EXPRESS.displayName -> cvv.length == 4
-                                else -> cvv.length == 3
-                            }
-                            val network = cardNetworkField.text
+                            val isCvvValid = if (cardNetwork == CardNetwork.AMERICAN_EXPRESS.displayName) cvv.length == 4 else cvv.length == 3
 
                             when {
                                 !isNameValid -> coroutineScope.launch {
                                     snackbarHostState.showSnackbar(context.getString(R.string.toast_name_valid))
                                 }
-
                                 !isNumberValid -> coroutineScope.launch {
                                     snackbarHostState.showSnackbar(context.getString(R.string.toast_number_valid))
                                 }
-
                                 !isExpiryValid -> coroutineScope.launch {
                                     snackbarHostState.showSnackbar(context.getString(R.string.toast_expiry_valid))
                                 }
-
                                 !isCvvValid -> coroutineScope.launch {
                                     snackbarHostState.showSnackbar(context.getString(R.string.toast_cvv_valid))
                                 }
-
                                 else -> {
                                     viewModel.save(
                                         CardEntity(
                                             name = name,
-                                            number = number,
+                                            number = numberRaw,
                                             expiry = expiry,
                                             cvv = cvv,
-                                            network = network
+                                            network = cardNetwork
                                         )
                                     )
                                     name = ""
-                                    expiryField = TextFieldValue("")
+                                    expiry = ""
                                     cvv = ""
-                                    cardNumberField = TextFieldValue("")
-                                    cardNetworkField = TextFieldValue("")
+                                    cardNumber = ""
+                                    cardNetwork = ""
                                     coroutineScope.launch {
                                         snackbarHostState.showSnackbar(context.getString(R.string.card_saved))
                                     }
