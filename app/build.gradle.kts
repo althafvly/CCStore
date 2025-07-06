@@ -56,6 +56,10 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     implementation(libs.android.database.sqlcipher)
     implementation(libs.androidx.activity.compose)
