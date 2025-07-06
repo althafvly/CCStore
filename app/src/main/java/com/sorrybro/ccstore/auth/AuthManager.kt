@@ -1,5 +1,6 @@
 package com.sorrybro.ccstore.auth
 
+import android.app.Activity
 import android.content.Context
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -9,25 +10,13 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 object AuthManager {
-    private var lastAuthenticatedTime: Long = 0L
-    private const val TIMEOUT_MS = 60_000L // 60 seconds
-
-    fun updateLastPauseTime() {
-        lastAuthenticatedTime = System.currentTimeMillis()
-    }
-
-    fun needsReAuth(): Boolean {
-        val elapsed = System.currentTimeMillis() - lastAuthenticatedTime
-        return lastAuthenticatedTime > 0 && elapsed > TIMEOUT_MS
-    }
-
     fun authenticate(
-        context: Context,
+        activity: Activity,
         executor: Executor = Executors.newSingleThreadExecutor(),
         onSuccess: () -> Unit,
         onError: ((errorCode: Int, errString: CharSequence) -> Unit)? = null
     ) {
-        val biometricManager = BiometricManager.from(context)
+        val biometricManager = BiometricManager.from(activity)
         val canAuthenticate = biometricManager.canAuthenticate(
             BiometricManager.Authenticators.BIOMETRIC_WEAK or
                     BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -39,10 +28,10 @@ object AuthManager {
         }
 
         val biometricPrompt = BiometricPrompt(
-            context as FragmentActivity, executor,
+            activity as FragmentActivity, executor,
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    context.runOnUiThread {
+                    activity.runOnUiThread {
                         onSuccess()
                     }
                 }
@@ -52,9 +41,9 @@ object AuthManager {
                         errorCode == BiometricPrompt.ERROR_USER_CANCELED ||
                         errorCode == BiometricPrompt.ERROR_CANCELED
                     ) {
-                        context.finishAffinity()
+                        activity.finishAffinity()
                     } else {
-                        context.runOnUiThread {
+                        activity.runOnUiThread {
                             onError?.invoke(errorCode, errString)
                             onSuccess()
                         }
@@ -63,7 +52,7 @@ object AuthManager {
             })
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(context.getString(R.string.authenticate_title))
+            .setTitle(activity.getString(R.string.authenticate_title))
             .setAllowedAuthenticators(
                 BiometricManager.Authenticators.BIOMETRIC_WEAK or
                         BiometricManager.Authenticators.DEVICE_CREDENTIAL
