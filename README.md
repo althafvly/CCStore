@@ -6,10 +6,11 @@
 
 ## ✨ Features
 
-- Save cardholder **name**, **number**, and **expiry date**
-- Tap to copy **card number** or **expiry date**
+- Save cardholder **card name**, **bank name**, **card network**, **card number**, and **expiry date**
+- Tap to copy **card number**, **expiry date** and **cvv**
 - **Material 3 UI** with dark mode support
 - **Offline-first**: no internet permission, no cloud sync
+- Card filtering by **card network** or **bank name**
 
 ---
 
@@ -27,7 +28,7 @@
 
 - No internet permission — your data never leaves the device.
 - All card data is stored locally using Android’s Room database.
-- No analytics or tracking.
+- No analytics, ads or tracking.
 
 ---
 
