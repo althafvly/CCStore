@@ -27,4 +27,7 @@
     <string name="authenticating">Authenticating…</string>
     <string name="bank_name">Bank name</string>
     <string name="none">None</string>
+    <string name="all">All</string>
+    <string name="bank">Bank</string>
+    <string name="network">Network</string>
 </resources>
