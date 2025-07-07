@@ -3,7 +3,6 @@ package com.sorrybro.ccstore.pref
 import android.content.Context
 import androidx.core.content.edit
 import com.sorrybro.ccstore.Constants
-import com.sorrybro.ccstore.db.CardDatabase
 import dev.spght.encryptedprefs.EncryptedSharedPreferences
 import dev.spght.encryptedprefs.MasterKey
 
@@ -16,11 +15,7 @@ object PassphraseManager {
             masterKey = masterKey,
         )
 
-        val default = if (CardDatabase.isUsingOldPassphrase(context)) {
-            Constants.DEFAULT_PASSPHRASE
-        } else null
-
-        return prefs.getString(Constants.KEY_PASSPHRASE, default) ?: generateRandomPassword().also {
+        return prefs.getString(Constants.KEY_PASSPHRASE, null) ?: generateRandomPassword().also {
             prefs.edit { putString(Constants.KEY_PASSPHRASE, it) }
         }
     }

@@ -1,6 +1,7 @@
 package com.sorrybro.ccstore.db
 
 import android.content.Context
+import android.database.sqlite.SQLiteException
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -27,44 +28,30 @@ abstract class CardDatabase : RoomDatabase() {
 
         fun getDatabase(context: Context, passkey: String): CardDatabase {
             return INSTANCE ?: synchronized(this) {
-                val passphrase = SQLiteDatabase.getBytes(passkey.toCharArray())
-                val factory = SupportFactory(passphrase)
-                val instance = getDatabaseBuilder(context).openHelperFactory(factory)
-                    .addMigrations(MIGRATION_1_2).build()
+                val firstTryPassphrase =
+                    SQLiteDatabase.getBytes(Constants.DEFAULT_PASSPHRASE.toCharArray())
+                val secondTryPassphrase = SQLiteDatabase.getBytes(passkey.toCharArray())
+
+                val instance = try {
+                    buildDatabase(context, firstTryPassphrase)
+                } catch (_: SQLiteException) {
+                    buildDatabase(context, secondTryPassphrase)
+                }
+
                 INSTANCE = instance
                 instance
             }
         }
 
-        fun getDatabaseBuilder(context: Context): Builder<CardDatabase> {
+        private fun buildDatabase(context: Context, passphrase: ByteArray): CardDatabase {
+            val factory = SupportFactory(passphrase)
             return Room.databaseBuilder(
                 context.applicationContext,
                 CardDatabase::class.java,
                 Constants.DB_NAME
-            )
-        }
-
-        fun isUsingOldPassphrase(context: Context): Boolean {
-            val dbFile = context.getDatabasePath(Constants.DB_NAME)
-            if (!dbFile.exists()) {
-                return false // DB doesn't exist at all
-            }
-
-            return try {
-                val passphrase = SQLiteDatabase.getBytes(Constants.DEFAULT_PASSPHRASE.toCharArray())
-                val factory = SupportFactory(passphrase)
-
-                getDatabaseBuilder(context)
-                    .openHelperFactory(factory)
-                    .allowMainThreadQueries() // Safe here since we're only testing
-                    .build()
-                    .openHelper
-                    .writableDatabase // Try to open with the known passphrase
-
-                true
-            } catch (_: Exception) {
-                false
-            }
+            ).openHelperFactory(factory)
+                .addMigrations(MIGRATION_1_2)
+                .build()
         }
     }
 }
