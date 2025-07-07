@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,7 +50,9 @@ import com.sorrybro.ccstore.view.CardViewModel
 @Composable
 fun CardListScreen(viewModel: CardViewModel, padding: PaddingValues) {
     val cards by viewModel.cards.collectAsState()
-    val sortedCards = cards.sortedBy { it.bankName.lowercase() }
+    val sortedCards by remember(cards) {
+        derivedStateOf { cards.sortedBy { it.bankName.lowercase() } }
+    }
     val clipboardManager = LocalClipboard.current
     var cardToDelete by remember { mutableStateOf<CardEntity?>(null) }
 
@@ -83,7 +86,7 @@ fun CardListScreen(viewModel: CardViewModel, padding: PaddingValues) {
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(sortedCards) { card ->
+            items(sortedCards, key = { it.id }) { card ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()

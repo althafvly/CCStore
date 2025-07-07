@@ -62,10 +62,10 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
     var cardNumber by rememberSaveable { mutableStateOf("") }
     var cardNetwork by rememberSaveable { mutableStateOf("") }
     var expiry by rememberSaveable { mutableStateOf("") }
-    val supportedNetworks = CardNetwork.displayNames()
-    val supportedBanks = BankName.displayNames()
-    var networkExpanded by rememberSaveable { mutableStateOf(false) }
-    var bankNameExpanded by rememberSaveable { mutableStateOf(false) }
+    val supportedNetworks = remember { CardNetwork.displayNames() }
+    val supportedBanks = remember { BankName.displayNames() }
+    var networkExpanded by remember { mutableStateOf(false) }
+    var bankNameExpanded by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
