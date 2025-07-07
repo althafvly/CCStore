@@ -1,5 +1,6 @@
 package com.sorrybro.ccstore.screen
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +54,7 @@ import com.sorrybro.ccstore.data.CardNetwork
 import com.sorrybro.ccstore.view.CardViewModel
 import kotlinx.coroutines.launch
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
@@ -85,15 +87,13 @@ fun SaveCardScreen(viewModel: CardViewModel, padding: PaddingValues) {
                     )
                 }
             )
-        },
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets
-    ) { innerPadding ->
+        }
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(padding)
                 .padding(horizontal = 16.dp),
-            contentAlignment = Alignment.Center
         ) {
             Card(
                 modifier = Modifier
