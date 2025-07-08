@@ -1,6 +1,5 @@
 [versions]
 agp = "8.11.0"
-androidDatabaseSqlcipher = "4.5.4"
 biometric = "1.4.0-alpha04"
 encryptedprefsKtx = "1.0.3"
 kotlin = "2.2.0"
@@ -12,11 +11,10 @@ composeBom = "2025.06.01"
 materialIconsExtended = "1.7.8"
 navigationCompose = "2.9.1"
 roomKtx = "2.7.2"
-securityCrypto = "1.1.0-beta01"
+sqlcipherAndroid = "4.9.0"
 sqliteFramework = "2.5.2"
 
 [libraries]
-android-database-sqlcipher = { module = "net.zetetic:android-database-sqlcipher", version.ref = "androidDatabaseSqlcipher" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleRuntimeKtx" }
@@ -29,7 +27,6 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomKtx" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomKtx" }
-androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 androidx-sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqliteFramework" }
 androidx-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version.ref = "sqliteFramework" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
@@ -37,6 +34,7 @@ androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 encryptedprefs-ktx = { module = "dev.spght:encryptedprefs-ktx", version.ref = "encryptedprefsKtx" }
+sqlcipher-android = { module = "net.zetetic:sqlcipher-android", version.ref = "sqlcipherAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

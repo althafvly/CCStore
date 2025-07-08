@@ -61,7 +61,7 @@ ksp {
 }
 
 dependencies {
-    implementation(libs.android.database.sqlcipher)
+    implementation(libs.sqlcipher.android)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.biometric)
     implementation(platform(libs.androidx.compose.bom))

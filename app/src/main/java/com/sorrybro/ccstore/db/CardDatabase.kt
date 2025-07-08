@@ -9,12 +9,15 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.sorrybro.ccstore.Constants
 import com.sorrybro.ccstore.data.CardEntity
-import net.sqlcipher.database.SQLiteDatabase
-import net.sqlcipher.database.SupportFactory
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 @Database(entities = [CardEntity::class], version = Constants.DB_VERSION)
 abstract class CardDatabase : RoomDatabase() {
     abstract fun cardDao(): CardDao
+
+    init {
+        System.loadLibrary("sqlcipher")
+    }
 
     companion object {
         @Volatile
@@ -28,19 +31,15 @@ abstract class CardDatabase : RoomDatabase() {
 
         fun getDatabase(context: Context, passkey: String): CardDatabase {
             return INSTANCE ?: synchronized(this) {
-                val pass1 = SQLiteDatabase.getBytes(passkey.toCharArray())
-                // Old default password
-                val pass2 = SQLiteDatabase.getBytes(Constants.DEFAULT_PASSPHRASE.toCharArray())
-
                 val instance = try {
-                    buildDatabase(context, pass1).also {
+                    buildDatabase(context, passkey).also {
                         // Validate DB
                         it.openHelper.readableDatabase.query("SELECT count(*) FROM sqlite_master").use { c ->
                             if (c.moveToFirst()) c.getInt(0)
                         }
                     }
                 } catch (_: SQLiteException) {
-                    buildDatabase(context, pass2)
+                    buildDatabase(context, Constants.DEFAULT_PASSPHRASE)
                 }
 
                 INSTANCE = instance
@@ -48,8 +47,8 @@ abstract class CardDatabase : RoomDatabase() {
             }
         }
 
-        private fun buildDatabase(context: Context, passphrase: ByteArray): CardDatabase {
-            val factory = SupportFactory(passphrase)
+        private fun buildDatabase(context: Context, passphrase: String): CardDatabase {
+            val factory = SupportOpenHelperFactory(passphrase.toByteArray(Charsets.UTF_8))
             return Room.databaseBuilder(
                 context.applicationContext,
                 CardDatabase::class.java,
