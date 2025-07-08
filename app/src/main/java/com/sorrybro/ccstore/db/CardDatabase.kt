@@ -1,7 +1,6 @@
 package com.sorrybro.ccstore.db
 
 import android.content.Context
-import android.database.sqlite.SQLiteException
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -15,10 +14,6 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 abstract class CardDatabase : RoomDatabase() {
     abstract fun cardDao(): CardDao
 
-    init {
-        System.loadLibrary("sqlcipher")
-    }
-
     companion object {
         @Volatile
         private var INSTANCE: CardDatabase? = null
@@ -29,26 +24,15 @@ abstract class CardDatabase : RoomDatabase() {
             }
         }
 
-        fun getDatabase(context: Context, passkey: String): CardDatabase {
+        fun getInstance(context: Context, passphrase: String): CardDatabase {
             return INSTANCE ?: synchronized(this) {
-                val instance = try {
-                    buildDatabase(context, passkey).also {
-                        // Validate DB
-                        it.openHelper.readableDatabase.query("SELECT count(*) FROM sqlite_master").use { c ->
-                            if (c.moveToFirst()) c.getInt(0)
-                        }
-                    }
-                } catch (_: SQLiteException) {
-                    buildDatabase(context, Constants.DEFAULT_PASSPHRASE)
-                }
-
-                INSTANCE = instance
-                instance
+                INSTANCE ?: buildDatabase(context, passphrase).also { INSTANCE = it }
             }
         }
 
         private fun buildDatabase(context: Context, passphrase: String): CardDatabase {
-            val factory = SupportOpenHelperFactory(passphrase.toByteArray(Charsets.UTF_8))
+            System.loadLibrary("sqlcipher")
+            val factory = SupportOpenHelperFactory(passphrase.toByteArray())
             return Room.databaseBuilder(
                 context.applicationContext,
                 CardDatabase::class.java,

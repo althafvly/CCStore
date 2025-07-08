@@ -17,7 +17,7 @@ class CardViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private val dao: CardDao by lazy {
-        CardDatabase.getDatabase(app, passphrase).cardDao()
+        CardDatabase.getInstance(app, passphrase).cardDao()
     }
 
     val cards = dao.getAll().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
