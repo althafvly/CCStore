@@ -28,14 +28,19 @@ abstract class CardDatabase : RoomDatabase() {
 
         fun getDatabase(context: Context, passkey: String): CardDatabase {
             return INSTANCE ?: synchronized(this) {
-                val firstTryPassphrase =
-                    SQLiteDatabase.getBytes(Constants.DEFAULT_PASSPHRASE.toCharArray())
-                val secondTryPassphrase = SQLiteDatabase.getBytes(passkey.toCharArray())
+                val pass1 = SQLiteDatabase.getBytes(passkey.toCharArray())
+                // Old default password
+                val pass2 = SQLiteDatabase.getBytes(Constants.DEFAULT_PASSPHRASE.toCharArray())
 
                 val instance = try {
-                    buildDatabase(context, firstTryPassphrase)
+                    buildDatabase(context, pass1).also {
+                        // Validate DB
+                        it.openHelper.readableDatabase.query("SELECT count(*) FROM sqlite_master").use { c ->
+                            if (c.moveToFirst()) c.getInt(0)
+                        }
+                    }
                 } catch (_: SQLiteException) {
-                    buildDatabase(context, secondTryPassphrase)
+                    buildDatabase(context, pass2)
                 }
 
                 INSTANCE = instance
