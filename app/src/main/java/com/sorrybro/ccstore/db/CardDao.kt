@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.sorrybro.ccstore.data.CardEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -18,4 +19,7 @@ interface CardDao {
 
     @Delete
     suspend fun delete(card: CardEntity)
+
+    @Update
+    suspend fun update(card: CardEntity): Int
 }

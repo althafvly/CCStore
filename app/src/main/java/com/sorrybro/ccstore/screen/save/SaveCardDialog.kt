@@ -2,7 +2,6 @@ package com.sorrybro.ccstore.screen.save
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
@@ -11,26 +10,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.sorrybro.ccstore.data.CardEntity
 import com.sorrybro.ccstore.view.CardViewModel
 
 @Composable
 fun SaveCardDialog(
     viewModel: CardViewModel,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    initialCard: CardEntity? = null
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
-    AlertDialog(
-        onDismissRequest = {},
-        confirmButton = {},
-        shape = RoundedCornerShape(16.dp),
-        text = {
-            SaveCardForm(
-                viewModel = viewModel,
-                snackbarHostState = snackbarHostState,
-                onDismissRequest = onDismissRequest
-            )
-        }
+    SaveCardForm(
+        viewModel = viewModel,
+        snackbarHostState = snackbarHostState,
+        onDismissRequest = onDismissRequest,
+        initialCard = initialCard
     )
 
     // Optional: can add a SnackbarHost outside of AlertDialog if needed

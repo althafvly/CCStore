@@ -27,4 +27,5 @@
     <string name="network">Network</string>
     <string name="authenticate">Authenticate</string>
     <string name="tap_to_authenticate">Tap to authenticate</string>
+    <string name="edit">Edit</string>
 </resources>

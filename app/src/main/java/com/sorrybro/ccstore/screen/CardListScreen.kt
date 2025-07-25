@@ -25,6 +25,7 @@ import com.sorrybro.ccstore.R
 import com.sorrybro.ccstore.data.BankName
 import com.sorrybro.ccstore.data.CardEntity
 import com.sorrybro.ccstore.data.CardNetwork
+import com.sorrybro.ccstore.screen.save.SaveCardDialog
 import com.sorrybro.ccstore.screen.view.CardItem
 import com.sorrybro.ccstore.screen.view.DeleteCardDialog
 import com.sorrybro.ccstore.screen.view.FilterDropdown
@@ -58,6 +59,15 @@ fun CardListScreen(viewModel: CardViewModel, padding: PaddingValues) {
                 cardToDelete = null
             },
             onDismiss = { cardToDelete = null }
+        )
+    }
+
+    var cardToEdit by remember { mutableStateOf<CardEntity?>(null) }
+    if (cardToEdit != null) {
+        SaveCardDialog(
+            viewModel = viewModel,
+            onDismissRequest = { cardToEdit = null },
+            initialCard = cardToEdit
         )
     }
 
@@ -102,7 +112,8 @@ fun CardListScreen(viewModel: CardViewModel, padding: PaddingValues) {
                         val clip = ClipData.newPlainText(label, value)
                         clipboardManager.nativeClipboard.setPrimaryClip(clip)
                     },
-                    onDelete = { cardToDelete = it }
+                    onDelete = { cardToDelete = it },
+                    onEdit = { cardToEdit = it }
                 )
             }
         }

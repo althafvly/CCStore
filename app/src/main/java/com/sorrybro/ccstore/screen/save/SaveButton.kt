@@ -28,7 +28,8 @@ fun SaveButton(
     bankName: String,
     viewModel: CardViewModel,
     snackbarHostState: SnackbarHostState,
-    onSaved: () -> Unit
+    onSaved: () -> Unit,
+    initialCard: CardEntity? = null
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -68,16 +69,30 @@ fun SaveButton(
                 }
 
                 else -> {
-                    viewModel.save(
-                        CardEntity(
-                            name = name,
-                            number = numberRaw,
-                            expiry = expiry,
-                            cvv = cvv,
-                            network = cardNetwork,
-                            bankName = bankName
+                    if (initialCard == null) {
+                        viewModel.save(
+                            CardEntity(
+                                name = name,
+                                number = numberRaw,
+                                expiry = expiry,
+                                cvv = cvv,
+                                network = cardNetwork,
+                                bankName = bankName
+                            )
                         )
-                    )
+                    } else {
+                        viewModel.update(
+                            CardEntity(
+                                id = initialCard.id,
+                                name = name,
+                                number = numberRaw,
+                                expiry = expiry,
+                                cvv = cvv,
+                                network = cardNetwork,
+                                bankName = bankName
+                            )
+                        )
+                    }
                     onSaved()
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar(context.getString(R.string.card_saved))

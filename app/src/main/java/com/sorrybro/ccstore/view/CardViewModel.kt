@@ -24,4 +24,5 @@ class CardViewModel(app: Application) : AndroidViewModel(app) {
 
     fun save(card: CardEntity) = viewModelScope.launch { dao.insert(card) }
     fun delete(card: CardEntity) = viewModelScope.launch { dao.delete(card) }
+    fun update(card: CardEntity) = viewModelScope.launch { dao.update(card) }
 }
