@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name" translatable="false">CCStore</string>
-    <string name="add_card">Add Card</string>
     <string name="authenticate_title">Authenticate to access your cards</string>
     <string name="card_number">Card Number</string>
     <string name="card_saved">Card saved.</string>
@@ -10,7 +9,6 @@
     <string name="expiry_mm_yy">Expiry MM/YY</string>
     <string name="expires">"Expires: "</string>
     <string name="save_card">Save Card</string>
-    <string name="saved_cards">Saved Cards</string>
     <string name="toast_cvv_valid">CVV does not match for the card network.</string>
     <string name="toast_expiry_valid">Expiry must be in MM/YY format.</string>
     <string name="toast_name_valid">Name must be alphanumeric.</string>
@@ -20,14 +18,13 @@
     <string name="delete_card">Delete card</string>
     <string name="delete_card_confirm">Are you sure you want to delete this card?</string>
     <string name="cancel">Cancel</string>
-    <string name="card_number_copied">Card number copied</string>
     <string name="copy_number">Copy number</string>
-    <string name="expiry_copied">Expiry copied</string>
-    <string name="copy_expiry">Copy expiry</string>
     <string name="authenticating">Authenticating…</string>
     <string name="bank_name">Bank name</string>
     <string name="none">None</string>
     <string name="all">All</string>
     <string name="bank">Bank</string>
     <string name="network">Network</string>
+    <string name="authenticate">Authenticate</string>
+    <string name="tap_to_authenticate">Tap to authenticate</string>
 </resources>

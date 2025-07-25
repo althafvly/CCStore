@@ -17,7 +17,6 @@ fun MainTopBar(selectedRoute: String) {
         title = {
             Text(
                 when (selectedRoute) {
-                    NavRoutes.SAVE -> stringResource(R.string.add_card)
                     NavRoutes.LIST -> stringResource(R.string.your_cards)
                     else -> ""
                 },
