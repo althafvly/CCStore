@@ -23,7 +23,6 @@ fun SaveCardDialog(
 
     SaveCardForm(
         viewModel = viewModel,
-        snackbarHostState = snackbarHostState,
         onDismissRequest = onDismissRequest,
         initialCard = initialCard
     )
