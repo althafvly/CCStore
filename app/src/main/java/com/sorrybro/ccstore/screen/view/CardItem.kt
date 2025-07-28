@@ -30,6 +30,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sorrybro.ccstore.R
 import com.sorrybro.ccstore.data.CardEntity
+import com.sorrybro.ccstore.data.CardNetwork
+
+
+// Card Formator
+fun formatCardNumberSmart(number: String, network: String): String {
+    val digits = number.filter { it.isDigit() }
+
+    return if (network == CardNetwork.AMERICAN_EXPRESS.displayName) {
+        val part1 = digits.take(4)
+        val part2 = digits.drop(4).take(6)
+        val part3 = digits.drop(10).take(5)
+        listOf(part1, part2, part3).filter { it.isNotEmpty() }.joinToString(" ")
+    } else {
+        digits.chunked(4).joinToString(" ")
+    }
+}
 
 @Composable
 fun CardItem(
@@ -105,7 +121,7 @@ fun CardItem(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     CardRowWithCopy(
-                        label = card.number,
+                        label = formatCardNumberSmart(card.number, card.network),
                         onCopy = { onCopy("number", card.number) }
                     )
 
