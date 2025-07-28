@@ -2,17 +2,17 @@
     <string name="app_name" translatable="false">CCStore</string>
     <string name="authenticate_title">Authenticate to access your cards</string>
     <string name="card_number">Card Number</string>
-    <string name="card_saved">Card saved.</string>
+    <string name="card_saved">Card successfully saved! 💾</string>
     <string name="cardholder_name">Cardholder Name</string>
     <string name="cvv">CVV</string>
     <string name="delete">Delete</string>
     <string name="expiry_mm_yy">Expiry MM/YY</string>
     <string name="expires">"Expires: "</string>
     <string name="save_card">Save Card</string>
-    <string name="toast_cvv_valid">CVV does not match for the card network.</string>
-    <string name="toast_expiry_valid">Expiry must be in MM/YY format.</string>
-    <string name="toast_name_valid">Name must be alphanumeric.</string>
-    <string name="toast_number_valid">Card number length does not match card network.</string>
+    <string name="toast_cvv_valid">CVV must be %d digits.</string>
+    <string name="toast_expiry_valid">Invalid expiry date. Use MM/YY format (e.g., 01/25).</string>
+    <string name="toast_name_valid">Invalid name. Only letters and spaces are allowed.</string>
+    <string name="toast_number_valid">Card number must be %d digits.</string>
     <string name="your_cards">Your Cards</string>
     <string name="card_network">Card network</string>
     <string name="delete_card">Delete card</string>

@@ -1,12 +1,11 @@
 package com.sorrybro.ccstore.screen.save
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -15,8 +14,6 @@ import com.sorrybro.ccstore.R
 import com.sorrybro.ccstore.data.CardEntity
 import com.sorrybro.ccstore.data.CardNetwork
 import com.sorrybro.ccstore.view.CardViewModel
-import kotlinx.coroutines.launch
-
 
 @Composable
 fun SaveButton(
@@ -27,12 +24,10 @@ fun SaveButton(
     cardNetwork: String,
     bankName: String,
     viewModel: CardViewModel,
-    snackbarHostState: SnackbarHostState,
     onSaved: () -> Unit,
     initialCard: CardEntity? = null
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
     Button(
         onClick = {
@@ -48,24 +43,26 @@ fun SaveButton(
                 else -> numberRaw.length in 13..19
             }
             val isExpiryValid = expiry.matches(Regex("^(0[1-9]|1[0-2])/\\d{2}$"))
-            val isCvvValid =
-                if (cardNetwork == CardNetwork.AMERICAN_EXPRESS.displayName) cvv.length == 4 else cvv.length == 3
+            val isAmex = cardNetwork == CardNetwork.AMERICAN_EXPRESS.displayName
+            val isCvvValid = if (isAmex) cvv.length == 4 else cvv.length == 3
+            val requiredLength = if (isAmex) 15 else 16
+            val cvvLength = if (isAmex) 4 else 3
 
             when {
-                !isNameValid -> coroutineScope.launch {
-                    snackbarHostState.showSnackbar(context.getString(R.string.toast_name_valid))
+                !isNameValid -> {
+                    Toast.makeText(context, context.getString(R.string.toast_name_valid), Toast.LENGTH_SHORT).show()
                 }
 
-                !isNumberValid -> coroutineScope.launch {
-                    snackbarHostState.showSnackbar(context.getString(R.string.toast_number_valid))
+                !isNumberValid -> {
+                    Toast.makeText(context, context.getString(R.string.toast_number_valid, requiredLength), Toast.LENGTH_SHORT).show()
                 }
 
-                !isExpiryValid -> coroutineScope.launch {
-                    snackbarHostState.showSnackbar(context.getString(R.string.toast_expiry_valid))
+                !isExpiryValid -> {
+                    Toast.makeText(context, context.getString(R.string.toast_expiry_valid), Toast.LENGTH_SHORT).show()
                 }
 
-                !isCvvValid -> coroutineScope.launch {
-                    snackbarHostState.showSnackbar(context.getString(R.string.toast_cvv_valid))
+                !isCvvValid -> {
+                    Toast.makeText(context, context.getString(R.string.toast_cvv_valid, cvvLength), Toast.LENGTH_SHORT).show()
                 }
 
                 else -> {
@@ -94,9 +91,7 @@ fun SaveButton(
                         )
                     }
                     onSaved()
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(context.getString(R.string.card_saved))
-                    }
+                    Toast.makeText(context, context.getString(R.string.card_saved), Toast.LENGTH_SHORT).show()
                 }
             }
         },

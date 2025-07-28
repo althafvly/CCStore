@@ -31,7 +31,6 @@ import com.sorrybro.ccstore.view.CardViewModel
 @Composable
 fun SaveCardForm(
     viewModel: CardViewModel,
-    snackbarHostState: SnackbarHostState,
     onDismissRequest: () -> Unit,
     initialCard: CardEntity? = null
 ) {
@@ -87,7 +86,6 @@ fun SaveCardForm(
                     cardNetwork = cardNetwork,
                     bankName = bankName,
                     viewModel = viewModel,
-                    snackbarHostState = snackbarHostState,
                     onSaved = {
                         name = ""
                         expiry = ""
