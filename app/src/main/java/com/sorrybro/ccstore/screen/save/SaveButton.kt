@@ -48,52 +48,46 @@ fun SaveButton(
             val requiredLength = if (isAmex) 15 else 16
             val cvvLength = if (isAmex) 4 else 3
 
-            when {
-                !isNameValid -> {
-                    Toast.makeText(context, context.getString(R.string.toast_name_valid), Toast.LENGTH_SHORT).show()
-                }
-
-                !isNumberValid -> {
-                    Toast.makeText(context, context.getString(R.string.toast_number_valid, requiredLength), Toast.LENGTH_SHORT).show()
-                }
-
-                !isExpiryValid -> {
-                    Toast.makeText(context, context.getString(R.string.toast_expiry_valid), Toast.LENGTH_SHORT).show()
-                }
-
-                !isCvvValid -> {
-                    Toast.makeText(context, context.getString(R.string.toast_cvv_valid, cvvLength), Toast.LENGTH_SHORT).show()
-                }
-
-                else -> {
-                    if (initialCard == null) {
-                        viewModel.save(
-                            CardEntity(
-                                name = name,
-                                number = numberRaw,
-                                expiry = expiry,
-                                cvv = cvv,
-                                network = cardNetwork,
-                                bankName = bankName
-                            )
-                        )
-                    } else {
-                        viewModel.update(
-                            CardEntity(
-                                id = initialCard.id,
-                                name = name,
-                                number = numberRaw,
-                                expiry = expiry,
-                                cvv = cvv,
-                                network = cardNetwork,
-                                bankName = bankName
-                            )
-                        )
-                    }
-                    onSaved()
-                    Toast.makeText(context, context.getString(R.string.card_saved), Toast.LENGTH_SHORT).show()
-                }
+            val errorMessage: String? = when {
+                !isNameValid -> context.getString(R.string.toast_name_valid)
+                !isNumberValid -> context.getString(R.string.toast_number_valid, requiredLength)
+                !isExpiryValid -> context.getString(R.string.toast_expiry_valid)
+                !isCvvValid -> context.getString(R.string.toast_cvv_valid, cvvLength)
+                else -> null
             }
+
+            if (errorMessage != null) {
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                return@Button
+            }
+
+            if (initialCard == null) {
+                viewModel.save(
+                    CardEntity(
+                        name = name,
+                        number = numberRaw,
+                        expiry = expiry,
+                        cvv = cvv,
+                        network = cardNetwork,
+                        bankName = bankName
+                    )
+                )
+            } else {
+                viewModel.update(
+                    CardEntity(
+                        id = initialCard.id,
+                        name = name,
+                        number = numberRaw,
+                        expiry = expiry,
+                        cvv = cvv,
+                        network = cardNetwork,
+                        bankName = bankName
+                    )
+                )
+            }
+
+            onSaved()
+            Toast.makeText(context, context.getString(R.string.card_saved), Toast.LENGTH_SHORT).show()
         },
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp)
