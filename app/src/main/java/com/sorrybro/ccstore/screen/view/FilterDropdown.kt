@@ -1,6 +1,5 @@
 package com.sorrybro.ccstore.screen.view
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -23,27 +22,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sorrybro.ccstore.R
 
-@SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterDropdown(
     label: String,
     options: List<String>,
     selectedOption: String?,
-    onOptionSelected: (String?) -> Unit
+    onOptionSelected: (String?) -> Unit,
+    boxWidth: Dp,
 ) {
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val boxWidth = screenWidth * 0.4f // 40% of screen width (adjust as needed)
-
     val interactionSource = remember { MutableInteractionSource() }
     var expanded by remember { mutableStateOf(false) }
+
+    // Precompute menu items to avoid recomposition each frame
+    val allOptionText = stringResource(R.string.all)
+    val menuOptions = remember(options) { listOf(allOptionText) + options }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -55,13 +54,13 @@ fun FilterDropdown(
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .menuAnchor(MenuAnchorType.PrimaryEditable, true)
-                .height(IntrinsicSize.Min) // height adapts to content
+                .height(IntrinsicSize.Min)
                 .width(boxWidth)
                 .indication(interactionSource, null),
             color = MaterialTheme.colorScheme.surface
         ) {
             TextField(
-                value = selectedOption ?: stringResource(R.string.all),
+                value = selectedOption ?: allOptionText,
                 onValueChange = {},
                 readOnly = true,
                 label = { Text(label, fontSize = 12.sp) },
@@ -77,18 +76,11 @@ fun FilterDropdown(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.all)) },
-                onClick = {
-                    onOptionSelected(null)
-                    expanded = false
-                }
-            )
-            options.forEach { option ->
+            menuOptions.forEach { option ->
                 DropdownMenuItem(
                     text = { Text(option) },
                     onClick = {
-                        onOptionSelected(option)
+                        onOptionSelected(if (option == allOptionText) null else option)
                         expanded = false
                     }
                 )
