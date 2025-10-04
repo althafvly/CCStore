@@ -42,7 +42,8 @@ fun NavGraph(navController: NavHostController, viewModel: CardViewModel, padding
 
     NavHost(navController = navController, startDestination = NavRoutes.LIST) {
         composable(NavRoutes.LIST) {
-            var isAuthenticated by rememberSaveable { mutableStateOf(false) }
+            val canAuthenticate = activity != null && AuthManager.canAuthenticate(activity)
+            var isAuthenticated by rememberSaveable { mutableStateOf(canAuthenticate) }
             var isAuthenticating by rememberSaveable { mutableStateOf(false) }
 
             if (isAuthenticated) {

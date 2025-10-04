@@ -9,19 +9,23 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 object AuthManager {
-    fun authenticate(
-        activity: Activity,
-        executor: Executor = Executors.newSingleThreadExecutor(),
-        onSuccess: () -> Unit,
-        onError: ((errorCode: Int, errString: CharSequence) -> Unit)? = null
-    ) {
+    fun canAuthenticate(activity: Activity): Boolean {
         val biometricManager = BiometricManager.from(activity)
         val canAuthenticate = biometricManager.canAuthenticate(
             BiometricManager.Authenticators.BIOMETRIC_WEAK or
                     BiometricManager.Authenticators.DEVICE_CREDENTIAL
         )
 
-        if (canAuthenticate != BiometricManager.BIOMETRIC_SUCCESS) {
+        return canAuthenticate != BiometricManager.BIOMETRIC_SUCCESS
+    }
+
+    fun authenticate(
+        activity: Activity,
+        executor: Executor = Executors.newSingleThreadExecutor(),
+        onSuccess: () -> Unit,
+        onError: ((errorCode: Int, errString: CharSequence) -> Unit)? = null
+    ) {
+        if (canAuthenticate(activity)) {
             onSuccess()
             return
         }
