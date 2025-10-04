@@ -19,11 +19,15 @@ import androidx.compose.ui.unit.dp
 import com.sorrybro.ccstore.R
 
 @Composable
-fun CardRowWithCopy(label: String, onCopy: () -> Unit) {
+fun CardRowWithCopy(label: String, onCopy: () -> Unit, isLarge: Boolean = false) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium,
+            style = if (isLarge) {
+                MaterialTheme.typography.titleLarge
+            } else {
+                MaterialTheme.typography.bodyMedium
+            },
             color = Color.White
         )
         Spacer(modifier = Modifier.width(8.dp))

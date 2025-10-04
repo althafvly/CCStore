@@ -128,35 +128,39 @@ fun CardItem(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = card.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color.White
+                CardRowWithCopy(
+                    label = card.name,
+                    onCopy = { onCopy("name", card.name) },
+                    isLarge = true
                 )
 
-                Column {
-                    CardRow(label = card.bankName)
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    CardRowWithCopy(
-                        label = formatCardNumberSmart(card.number, card.network),
-                        onCopy = { onCopy("number", card.number) }
-                    )
+                CardRowWithCopy(
+                    label = card.bankName,
+                    onCopy = { onCopy("bankName", card.bankName) }
+                )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    CardRowWithCopy(
-                        label = stringResource(R.string.expires) + " " + card.expiry,
-                        onCopy = { onCopy("expiry", card.expiry) }
-                    )
+                CardRowWithCopy(
+                    label = formatCardNumberSmart(card.number, card.network),
+                    onCopy = { onCopy("number", card.number) }
+                )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    CardRowWithCopy(
-                        label = stringResource(R.string.cvv) + ": " + card.cvv,
-                        onCopy = { onCopy("cvv", card.cvv) }
-                    )
-                }
+                CardRowWithCopy(
+                    label = stringResource(R.string.expires) + " " + card.expiry,
+                    onCopy = { onCopy("expiry", card.expiry) }
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                CardRowWithCopy(
+                    label = stringResource(R.string.cvv) + ": " + card.cvv,
+                    onCopy = { onCopy("cvv", card.cvv) }
+                )
             }
 
             Text(
