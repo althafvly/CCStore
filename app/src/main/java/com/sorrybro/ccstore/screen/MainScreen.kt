@@ -16,7 +16,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sorrybro.ccstore.nav.NavGraph
 import com.sorrybro.ccstore.nav.NavRoutes
-import com.sorrybro.ccstore.screen.save.SaveCardDialog
+import com.sorrybro.ccstore.screen.save.SaveCardForm
 import com.sorrybro.ccstore.view.CardViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +38,7 @@ fun MainScreen(viewModel: CardViewModel = viewModel()) {
         }
     ) { padding ->
         if (showDialog) {
-            SaveCardDialog(
+            SaveCardForm(
                 viewModel = viewModel,
                 onDismissRequest = { showDialog = false }
             )

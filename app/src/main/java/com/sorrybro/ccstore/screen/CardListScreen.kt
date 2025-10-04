@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -29,7 +27,7 @@ import com.sorrybro.ccstore.R
 import com.sorrybro.ccstore.data.BankName
 import com.sorrybro.ccstore.data.CardEntity
 import com.sorrybro.ccstore.data.CardNetwork
-import com.sorrybro.ccstore.screen.save.SaveCardDialog
+import com.sorrybro.ccstore.screen.save.SaveCardForm
 import com.sorrybro.ccstore.screen.view.CardItem
 import com.sorrybro.ccstore.screen.view.DeleteCardDialog
 import com.sorrybro.ccstore.screen.view.FilterDropdown
@@ -80,7 +78,7 @@ fun CardListScreen(viewModel: CardViewModel, padding: PaddingValues) {
 
     // Edit dialog
     if (cardToEdit != null) {
-        SaveCardDialog(
+        SaveCardForm(
             viewModel = viewModel,
             onDismissRequest = { cardToEdit = null },
             initialCard = cardToEdit
